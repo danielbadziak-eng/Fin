@@ -1,0 +1,9 @@
+{
+  "version": "5.0.0",
+  "name": "FinançasPRO 5.0.0 — App Foundation",
+  "base": "4.7.2",
+  "type": "PWA/local-first foundation",
+  "pwa": true,
+  "backend": false,
+  "tests_inherited": "4.7.x suite preserved"
+}

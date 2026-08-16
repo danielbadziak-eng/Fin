@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#0f1418"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="FinançasPRO"/>
+<title>FinançasPRO — Seu copiloto financeiro</title>
+<link rel="manifest" href="manifest.webmanifest"/>
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="icons/icon-192.svg"/>
+<link href="style.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style id="fp-onboarding-style">
+.fp-onboarding{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;font-family:inherit}
+.fp-onboarding[hidden]{display:none}
+.fp-onboarding-backdrop{position:absolute;inset:0;background:rgba(5,10,14,.78);backdrop-filter:blur(7px)}
+.fp-onboarding-card{position:relative;width:min(520px,100%);background:#11181d;border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:30px;box-shadow:0 24px 80px rgba(0,0,0,.42)}
+.fp-onboarding-brand{font-weight:800;letter-spacing:.02em;font-size:14px;margin-bottom:18px}.fp-onboarding-brand span{opacity:.7}
+.fp-onboarding-progress{height:5px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:28px}.fp-onboarding-progress span{display:block;height:100%;width:16.66%;background:#57d68a;transition:width .2s ease}
+.fp-step{display:none}.fp-step.active{display:block}.fp-eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.11em;opacity:.65;margin:0 0 9px}.fp-step h2{font-size:27px;line-height:1.18;margin:0 0 12px;font-weight:650}.fp-muted{font-size:15px;line-height:1.55;opacity:.68;margin:0 0 22px}.fp-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(87,214,138,.12);color:#57d68a;font-size:22px;margin-bottom:18px}.fp-label{display:block;font-size:13px;opacity:.75;margin-bottom:7px}.fp-input{width:100%;box-sizing:border-box;background:#0b1014;border:1px solid rgba(255,255,255,.12);color:inherit;border-radius:13px;padding:14px 15px;font:inherit;font-size:17px;outline:none}.fp-input:focus{border-color:#57d68a}.fp-actions{display:flex;gap:10px;margin-top:22px}.fp-primary,.fp-secondary{border:0;border-radius:12px;padding:13px 16px;font:inherit;font-weight:650;cursor:pointer}.fp-primary{background:#57d68a;color:#08110c;flex:1}.fp-secondary{background:rgba(255,255,255,.07);color:inherit}.fp-link{border:0;background:transparent;color:inherit;opacity:.65;padding:12px 0;cursor:pointer;font:inherit}.fp-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.fp-summary div{border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:13px}.fp-summary span{display:block;font-size:12px;opacity:.55;margin-bottom:5px}.fp-summary strong{font-size:17px}.fp-diagnosis-actions{display:flex;gap:12px;align-items:center}@media(max-width:520px){.fp-onboarding-card{padding:24px;border-radius:20px}.fp-step h2{font-size:24px}.fp-actions{flex-direction:column}.fp-secondary{order:2}.fp-summary{grid-template-columns:1fr 1fr}}
+</style>
+
+</head>
+<body>
+<div class="app-container">
+<aside class="sidebar">
+<div class="brand"><h2>Finanças<span>PRO</span></h2><small>Gestão Financeira Inteligente</small></div>
+<nav class="nav-menu">
+<button class="nav-btn active" onclick="switchTab('dashboard',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><rect height="9" rx="1.5" width="7" x="3" y="3"></rect><rect height="5" rx="1.5" width="7" x="14" y="3"></rect><rect height="9" rx="1.5" width="7" x="14" y="12"></rect><rect height="5" rx="1.5" width="7" x="3" y="16"></rect></svg> Dashboard</button>
+<button class="nav-btn" onclick="switchTab('orcamento',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><rect height="18" rx="2" width="16" x="4" y="3"></rect><path d="M8 3v3h8V3"></path><path d="M8 11h8M8 15h8M8 19h5"></path></svg> Orçamento</button>
+<button class="nav-btn" onclick="switchTab('patrimonio',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M21 7H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"></path><path d="M17 7V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v2"></path><circle cx="16.5" cy="13.5" r="1.5"></circle></svg> Patrimônio</button>
+<button class="nav-btn" onclick="switchTab('cartoes',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><rect height="14" rx="2" width="20" x="2" y="5"></rect><path d="M2 10h20"></path><path d="M6 15h4"></path></svg> Cartões</button>
+<button class="nav-btn" onclick="switchTab('metas',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1"></circle></svg> Metas</button>
+<button class="nav-btn" onclick="switchTab('extrato',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"></path></svg> Extrato</button>
+<button class="nav-btn" onclick="switchTab('simulador',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M3 17 9 11l4 4 8-8"></path><path d="M21 7h-6v6"></path></svg> Simulador</button>
+</nav>
+<div class="theme-switch">
+<label>Tema
+      <select id="themeSelect" onchange="applyTheme(this.value)">
+<option value="dark">🌙 Midnight Finance (Escuro)</option>
+<option value="light">☀️ Clean Finance (Claro)</option>
+</select>
+</label>
+</div>
+<div class="data-actions">
+<button class="btn-sm" onclick="exportarDados()">⭳ Exportar dados</button>
+<button class="btn-sm" onclick="auditarMotorFinanceiro()">✓ Auditoria financeira</button>
+<button class="btn-sm" onclick="$('importFile').click()">⭱ Importar dados</button>
+<input accept="application/json" id="importFile" onchange="importarDados(event)" style="display:none" type="file"/>
+</div>
+<div class="sidebar-foot">Dados salvos localmente no navegador</div>
+</aside>
+<main class="main-content">
+<section class="tab-content active" id="tab-dashboard">
+<header class="content-header dashboard-header">
+  <div><h1>Dashboard Executivo</h1><p id="dashboard-periodo"></p></div>
+  <div class="dashboard-header-actions">
+    <label class="dashboard-month-picker">Mês de referência<input id="dashboardMes" onchange="setDashboardMes(this.value)" type="month"/></label>
+    <button class="btn-sm dashboard-action-analyze" type="button" onclick="toggleFIN(true)">Analisar cenário</button>
+    <button class="btn-primary" type="button" onclick="openTransactionModal()">+ Nova transação</button>
+    <button class="btn-danger" type="button" onclick="resetarDados()">🗑 Apagar dados</button>
+    <button id="installAppBtn" class="btn-sm app-install-btn hidden" type="button">＋ Instalar app</button>
+  </div>
+</header>
+
+<div class="kpi-grid dashboard-kpi-simplified mt-20">
+  <div class="kpi-card"><span>Entradas</span><strong id="kpi-entradas">R$ 0,00</strong><small>Entradas do mês</small></div>
+  <div class="kpi-card"><span>Saídas</span><strong id="kpi-saidas">R$ 0,00</strong><small>Despesas do mês</small></div>
+  <div class="kpi-card kpi-priority"><span>Sobra</span><strong id="kpi-resultado">R$ 0,00</strong><small id="kpi-sobra-nota">Resultado do mês</small></div>
+  <div class="kpi-card"><span>Investimentos</span><strong id="kpi-investimento">R$ 0,00</strong><small id="kpi-investimento-comp">Aportes do mês</small></div>
+  <div class="kpi-card patrimonio-kpi-card" id="dashboard-patrimonio-kpi">
+    <div class="patrimonio-kpi-default" id="patrimonio-kpi-default"><span>Patrimônio líquido</span><strong id="kpi-patrimonio">R$ 0,00</strong><small>Ativos − passivos</small></div>
+    <div class="zero-invite hidden" id="dashboard-zero-patrimonio">
+      <div class="zero-invite-icon" aria-hidden="true">🔐</div>
+      <div class="zero-invite-copy">
+        <b>Comece a construir seu patrimônio</b>
+        <span>Organizar suas finanças começa com o primeiro passo.</span>
+      </div>
+      <div class="zero-invite-actions">
+        <button class="btn-primary btn-sm" type="button" onclick="openPatrimonioFlow('investimento')">+ Adicionar patrimônio</button>
+        <button class="btn-sm" type="button" onclick="$('importFile').click()">Importar dados</button>
+      </div>
+    </div>
+  </div>
+  <div class="kpi-card"><span>Reserva</span><strong id="kpi-reserva">0,0 meses</strong><small id="kpi-reserva-nota">Liquidez / média de despesas</small></div>
+</div>
+
+<div class="dashboard-decision-center mt-20" id="dashboard-decision-center">
+  <div class="card dashboard-fin-message" id="dashboard-fin-message">
+    <div class="dashboard-fin-character" aria-hidden="true"><span class="fin-character state-calm"><span class="fin-character-screen"><i class="fin-eye left"></i><i class="fin-eye right"></i><i class="fin-mouth"></i></span><b class="fin-character-coin">$</b></span></div>
+    <div class="dashboard-fin-copy">
+      <span class="eyebrow">FIN · SEU COPILOTO FINANCEIRO</span>
+      <h3 id="dashboard-fin-title">Analisando seu cenário...</h3>
+      <p id="dashboard-fin-text">Estou consolidando seus dados para trazer a leitura mais importante do momento.</p>
+      <small id="dashboard-fin-action">O FIN acompanha seu cenário e explica o que realmente importa.</small>
+      <div class="dashboard-fin-actions"><button class="btn-primary" type="button" onclick="toggleFIN(true)">Abrir FIN</button><button class="btn-sm" type="button" onclick="toggleFIN(true)">Perguntar ao FIN</button></div>
+    </div>
+  </div>
+
+  <div class="dashboard-spend-decision" id="dashboard-spend-decision">
+    <div><span class="eyebrow">COMO ESTÁ SUA MARGEM HOJE?</span><strong id="dashboard-spend-value">R$ 0,00</strong><p id="dashboard-spend-note">Calculando a margem segura para o mês...</p></div>
+    <span class="badge" id="dashboard-spend-status">Calculando</span>
+  </div>
+
+  <div class="card dashboard-forecast-decision">
+    <div class="card-title"><div><h3>🔮 Próximos 90 dias</h3><p>Se os compromissos conhecidos e o padrão atual forem mantidos.</p></div><span class="badge" id="dashboard-forecast-status">Calculando</span></div>
+    <div id="dashboard-forecast-timeline" class="dashboard-forecast-timeline"></div>
+    <div id="dashboard-forecast-investment-summary" class="dashboard-forecast-investment-summary"></div>
+    <div id="dashboard-forecast-message" class="dashboard-forecast-message"></div>
+  </div>
+</div>
+
+<div class="card dashboard-finance-trend-card mt-20">
+  <div class="card-title"><div><h3>Evolução financeira · últimos 6 meses</h3><p>Receitas, despesas e sobra para enxergar a tendência antes de tomar decisões.</p></div><span class="badge">Tendência</span></div>
+  <div class="chart-container dashboard-finance-trend-chart"><canvas id="chartDashboardFinanceTrend"></canvas></div>
+</div>
+
+<div class="card patrimonio-evolution-card dashboard-evolution-card mt-20">
+  <div class="card-title"><div><h3>Evolução do Patrimônio Líquido</h3><p>Patrimônio líquido acumulado por mês, com base nos fechamentos registrados.</p></div><span class="badge" id="pat-evolucao-periodo">Últimos 6 meses</span></div>
+  <div class="chart-container patrimonio-evolution-chart"><canvas id="chartPatrimonioLiquido"></canvas></div>
+  <div class="pat-evolucao-footer"><div><span>Patrimônio atual</span><strong id="pat-evolucao-atual">R$ 0,00</strong></div><div><span>Variação no período</span><strong id="pat-evolucao-variacao">R$ 0,00</strong></div></div>
+</div>
+</section>
+<section class="tab-content" id="tab-orcamento">
+<header class="content-header"><div><h1>Orçamento Dinâmico</h1><p>Planejado, realizado, pago e pendências acumuladas do mês.</p></div><div class="header-actions"><button class="btn-primary" onclick="openTransactionModal()">+ Nova transação</button><button class="btn-sm" onclick="openOrcamentoModal()">+ Novo orçamento</button></div></header>
+<div class="card mb-20 budget-summary-card"><div class="budget-summary-grid"><div><span>Planejado</span><strong id="orc-total-planejado">R$ 0,00</strong></div><div><span>Realizado</span><strong id="orc-total-realizado">R$ 0,00</strong></div><div><span>Pendência anterior</span><strong id="orc-total-anterior">R$ 0,00</strong></div><div><span>Compromisso total</span><strong id="orc-total-compromisso">R$ 0,00</strong></div></div></div>
+<div class="card budget-table-card"><div class="budget-table-head"><div><h3>Acompanhamento por categoria</h3><p class="muted">Clique em <b>Detalhes</b> para registrar pagamentos e acompanhar pendências sem sobrecarregar a tabela.</p></div><button class="btn-sm" onclick="openOrcamentoModal()">＋ Incluir categoria</button></div><div class="table-responsive"><table class="table budget-table" id="table-orcamento"><thead><tr><th>Categoria</th><th>Planejado</th><th>Realizado</th><th>Compromisso</th><th>Utilização</th><th>Status</th><th>Ação</th></tr></thead><tbody></tbody></table></div></div>
+</section>
+<section class="tab-content" id="tab-patrimonio">
+<header class="content-header"><div><h1>Patrimônio &amp; Liquidez</h1><p>Visão consolidada dos seus ativos, passivos e liquidez.</p></div><div class="header-actions"><button class="btn-sm" onclick="openPatrimonioFlow('imovel')">+ Imóvel</button><button class="btn-sm" onclick="openPatrimonioFlow('investimento')">+ Investimento</button><button class="btn-sm" onclick="openResgateModal()">+ Resgatar</button><button class="btn-sm" onclick="openPatrimonioFlow('divida')">+ Dívida</button></div></header>
+<div class="kpi-grid">
+<div class="kpi-card"><span>Patrimônio bruto</span><strong id="pat-bruto">R$ 0,00</strong></div>
+<div class="kpi-card"><span>Dívidas</span><strong id="pat-dividas">R$ 0,00</strong></div>
+<div class="kpi-card"><span>Patrimônio líquido</span><strong id="pat-liquido">R$ 0,00</strong></div>
+<div class="kpi-card"><span>Patrimônio investível</span><strong id="pat-investivel">R$ 0,00</strong></div>
+<div class="kpi-card"><span>Ativos líquidos</span><strong id="pat-liquidos-val">R$ 0,00</strong><small id="pat-liq-meses"></small></div>
+<div class="kpi-card"><span>Juros futuros</span><strong id="pat-juros-futuros">R$ 0,00</strong><small>Financiamentos cadastrados</small></div>
+</div>
+<div class="patrimonio-visual-grid mt-20">
+<div class="card patrimonio-composition-card"><div class="card-title"><div><h3>Composição dos Ativos</h3><p>Onde está concentrado o patrimônio bruto.</p></div><span class="badge">Ativos</span></div><div class="patrimonio-donut-layout"><div class="chart-container patrimonio-donut"><canvas id="chartPatrimonioAtivos"></canvas></div><div id="patrimonio-ativos-legenda" class="composition-legend"></div></div></div>
+<div class="card patrimonio-composition-card"><div class="card-title"><div><h3>Composição dos Passivos</h3><p>Distribuição das dívidas cadastradas.</p></div><span class="badge">Passivos</span></div><div class="patrimonio-donut-layout"><div class="chart-container patrimonio-donut"><canvas id="chartPatrimonioPassivos"></canvas></div><div id="patrimonio-passivos-legenda" class="composition-legend"></div></div></div>
+</div>
+<div class="card patrimonio-financing-card mt-20"><div class="card-title"><div><h3>Financiamentos</h3><p>Saldo, juros futuros e impacto das amortizações.</p></div><div><span class="badge" id="pat-financiamentos-count">0 cadastrados</span> <button class="btn-sm" onclick="openAmortizacaoModal()">+ Amortizar</button></div></div><div class="financing-summary-list" id="pat-passivo-resumo"></div></div>
+<div class="card mt-20"><div class="table-responsive"><table class="table" id="table-patrimonio"><thead><tr><th>Item</th><th>Classe</th><th>Categoria</th><th>Valor / Saldo</th><th>Liquidez</th><th>Investível</th><th>Ação</th></tr></thead><tbody></tbody></table></div></div>
+</section>
+<section class="tab-content" id="tab-cartoes">
+<header class="content-header"><div><h1>Cartões &amp; Faturas</h1><p>Limite, utilização, faturas e comprometimento futuro.</p></div><div class="header-actions"><button class="btn-sm" onclick="openFaturaModal()">+ Nova fatura</button><button class="btn-sm" onclick="openCartaoModal()">+ Novo cartão</button></div></header>
+<div class="kpi-grid">
+<div class="kpi-card"><span>Limite total</span><strong id="card-limite-total">R$ 0,00</strong></div>
+<div class="kpi-card"><span>Utilizado</span><strong id="card-limite-usado">R$ 0,00</strong></div>
+<div class="kpi-card"><span>Disponível</span><strong id="card-limite-disp">R$ 0,00</strong></div>
+<div class="kpi-card"><span>Comprometimento 6 meses</span><strong id="card-comp-futuro">R$ 0,00</strong></div>
+</div>
+<div class="card mt-20 card-risk-strip"><div class="card-risk-main"><div><strong id="card-risco-text">Comprometimento futuro: 0% da renda</strong><p class="muted">Maior comprometimento mensal futuro comparado à renda do respectivo mês.</p></div><label class="risk-limit-field">Limite seguro (%)<input id="card-limite-seguro" max="100" min="1" onchange="salvarLimiteCartao(this.value)" step="1" type="number"/></label></div><div class="progress risk-progress"><i id="card-risco-progress" style="width:0%"></i></div><small class="muted" id="card-risco-status">Defina seu limite de segurança.</small></div>
+<div class="card mt-20"><div class="table-responsive"><table class="table" id="table-cartoes"><thead><tr><th>Cartão</th><th>Limite</th><th>Disponível</th><th>Utilização</th><th>Fatura atual</th><th>Fech./Venc.</th><th>Ação</th></tr></thead><tbody></tbody></table></div></div>
+<div class="card mt-20"><h3>Compromissos futuros</h3><div class="table-responsive"><table class="table" id="table-compromissos"><thead><tr><th>Mês</th><th>Parcelas futuras</th><th>% da renda</th></tr></thead><tbody></tbody></table></div></div>
+</section>
+<section class="tab-content" id="tab-metas">
+<header class="content-header"><div><h1>Metas &amp; Prazos</h1><p>Aporte necessário calculado para cada objetivo.</p></div><div class="header-actions"><button class="btn-primary" onclick="openTransactionModal()">+ Nova transação</button><button class="btn-sm" onclick="openMetaModal()">+ Nova meta</button></div></header>
+<div class="card mb-20"><div class="card-title"><div><h3>Minha meta de economia</h3><p>Defina quanto da renda você quer economizar por mês.</p></div></div><div class="goal-target-row"><div><span>Meta mensal</span><strong id="meta-economia-display">0%</strong></div><button class="btn-sm" onclick="openEconomiaMetaModal()">Definir meta</button></div></div>
+<div class="meta-hero card">
+<div class="meta-hero-content">
+<div class="meta-donut-wrap">
+<div class="meta-donut" id="meta-donut" style="--progress:0deg;--milestone:180deg"><div><strong id="meta-hero-percent">0%</strong><span>Progresso</span></div></div>
+<div class="meta-donut-caption"><span>Marco 50%</span><b id="meta-hero-milestone">R$ 0,00</b></div>
+</div>
+<div class="meta-hero-details"><span class="eyebrow">Meta em destaque</span><h2 id="meta-hero-name">Nenhuma meta cadastrada</h2><p id="meta-hero-frase">Crie uma meta para acompanhar sua evolução.</p><div class="meta-hero-values"><div><span>Acumulado</span><b id="meta-hero-acumulado">R$ 0,00</b></div><div><span>Objetivo</span><b id="meta-hero-objetivo">R$ 0,00</b></div><div><span>Restante</span><b id="meta-hero-restante">R$ 0,00</b><button class="btn-link" id="meta-hero-reschedule" onclick="abrirNovoPrazoMeta()">Está pesado? Simular novo prazo</button></div></div><div class="meta-hero-actions"><button class="btn-sm" onclick="openMetaModal()">+ Nova meta</button><button class="btn-sm" id="meta-hero-edit" onclick="editarMetaHero()">Editar meta</button></div></div>
+</div>
+</div>
+<div class="card"><div class="table-responsive"><table class="table" id="table-metas"><thead><tr><th>Meta</th><th>Progresso</th><th>Restante</th><th>Prazo</th><th>Aporte necessário</th><th>Status</th><th>Ação</th></tr></thead><tbody></tbody></table></div></div>
+</section>
+<section class="tab-content" id="tab-extrato">
+<header class="content-header"><div><h1>Extrato &amp; Transações</h1><p>Pesquisa, filtros e análise do período selecionado.</p></div><button class="btn-primary" onclick="openTransactionModal()">+ Nova transação</button></header>
+<div class="card filters">
+<input id="filtroBusca" oninput="renderizarExtrato()" placeholder="🔎 Buscar descrição ou categoria"/>
+<select id="filtroTipo" onchange="renderizarExtrato()"><option value="">Todos os tipos</option><option value="receita">Receitas</option><option value="despesa">Despesas</option><option value="investimento">Investimentos</option><option value="pagamento_cartao">Pagamentos de cartão</option></select>
+<select id="filtroStatus" onchange="renderizarExtrato()"><option value="">Todos os status</option><option value="Realizada">Realizada</option><option value="Prevista">Prevista</option><option value="Cancelada">Cancelada</option></select>
+<input id="filtroMes" onchange="renderizarExtrato()" type="month"/>
+</div>
+<div class="dashboard-grid-2 mt-20">
+<div class="card"><div class="card-title"><div><h3>Resumo do período</h3><p>O total muda conforme os filtros aplicados.</p></div></div><div class="extract-summary-grid"><div><span>Receitas</span><strong id="extrato-total-receitas">R$ 0,00</strong></div><div><span>Despesas</span><strong id="extrato-total-despesas">R$ 0,00</strong></div><div><span>Investimentos</span><strong id="extrato-total-investimentos">R$ 0,00</strong></div><div><span>Resultado</span><strong id="extrato-total-resultado">R$ 0,00</strong></div></div></div>
+<div class="card"><div class="card-title"><div><h3>Distribuição dos gastos</h3><p>Despesas por categoria no período filtrado.</p></div></div><div class="chart-container small"><canvas id="chartExtratoCategorias"></canvas></div></div>
+</div>
+<div class="card mt-20"><div class="table-responsive"><table class="table" id="table-transacoes"><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Tipo</th><th>Status</th><th>Ação</th></tr></thead><tbody></tbody></table></div></div>
+</section>
+<div class="modal" id="orcDetalhesModal"><div class="modal-content budget-detail-modal"><button class="close" onclick="closeOrcamentoDetalhes()">×</button><div class="modal-eyebrow">Orçamento</div><h3 id="orcDetalhesTitulo">Detalhes da categoria</h3><p class="muted" id="orcDetalhesContexto"></p><div class="budget-detail-grid"><div><span>Pago</span><strong id="orcDetalhesPago">R$ 0,00</strong></div><div><span>Pendência anterior</span><strong id="orcDetalhesAnterior">R$ 0,00</strong></div><div><span>Pendente no mês</span><strong id="orcDetalhesPendente">R$ 0,00</strong></div><div><span>Compromisso</span><strong id="orcDetalhesCompromisso">R$ 0,00</strong></div></div><div class="budget-detail-form"><label>Valor pago<input id="orcDetalhesValorPago" type="number" min="0" step="0.01"></label><label class="checkbox-row"><input id="orcDetalhesPagoIntegral" type="checkbox"> <span>Marcar como pago integralmente</span></label><button class="btn-primary" onclick="salvarOrcamentoDetalhes()">＋ Registrar pagamento</button></div></div></div><div class="modal" id="orcModal"><div class="modal-content"><button class="close" onclick="closeOrcamentoModal()">×</button><h3 id="orcModalTitle">Editar orçamento</h3>
+<form onsubmit="handleSaveOrcamento(event)">
+<label>Categoria<input id="orcCategoria" required=""/></label>
+<label>Limite mensal<input id="orcValor" min="0" required="" step="0.01" type="number"/></label><p class="form-help">Renomear uma categoria atualiza também os lançamentos já existentes.</p>
+<button class="btn-primary mt-10" type="submit">Salvar orçamento</button>
+</form></div></div>
+
+<section class="tab-content" id="tab-simulador">
+<header class="content-header"><div><h1>Simulador Financeiro</h1><p>Organize decisões de gastos e imprevistos sem foco em independência financeira.</p></div></header>
+<div class="sim-subnav">
+<button class="active" onclick="switchSimSubTab('gastos',this)">💸 Gastos &amp; Cortes</button>
+<button onclick="switchSimSubTab('imprevisto',this)">⚠ Imprevistos</button>
+<button onclick="switchSimSubTab('whatif',this)">🧮 E Se...?</button>
+</div>
+<div class="sim-subpanel active" id="simPanel-gastos">
+<div class="simulator-layout">
+<div class="card simulator-form"><h3>Novo gasto ou corte de gasto</h3><p class="muted">Veja o impacto de adicionar ou cortar uma despesa no orçamento mensal.</p>
+<label>Descrição<input id="gs-desc" placeholder="Ex: Streaming extra, corte de academia..."/></label>
+<label>Valor mensal<input id="gs-valor" oninput="renderizarSimuladorGastos()" step="10" type="number" value="300"/></label>
+<label>Tipo<select id="gs-tipo" onchange="renderizarSimuladorGastos()"><option value="add">Novo gasto (aumenta despesa)</option><option value="corte">Corte de gasto (reduz despesa)</option></select></label>
+<label>Duração<select id="gs-duracao" onchange="renderizarSimuladorGastos()"><option value="12">12 meses</option><option value="24">24 meses</option><option value="0">Permanente / indefinido</option></select></label></div>
+<div class="card"><h3>Impacto projetado</h3><div class="sim-results"><div><span>Despesa mensal atual</span><strong id="gs-desp-atual">R$ 0,00</strong></div><div><span>Nova despesa mensal</span><strong id="gs-desp-nova">R$ 0,00</strong></div><div><span>Taxa de economia atual</span><strong id="gs-taxa-atual">0%</strong></div><div><span>Nova taxa de economia</span><strong id="gs-taxa-nova">0%</strong></div></div><div class="scenario-grid"><div><b>Impacto no ano</b><strong id="gs-impacto-ano">—</strong><small>Diferença acumulada em 12 meses</small></div><div><b>Novo saldo mensal</b><strong id="gs-saldo-novo">—</strong><small>Receita − nova despesa</small></div><div><b>Status</b><strong id="gs-status">—</strong><small>Saldo permanece positivo?</small></div></div></div></div>
+<div class="card mt-20"><h3>Projeção do saldo mensal com a simulação</h3><div class="chart-container"><canvas id="chartGastos"></canvas></div></div></div>
+<div class="sim-subpanel" id="simPanel-imprevisto">
+<div class="simulator-layout"><div class="card simulator-form"><h3>Simular imprevisto</h3><p class="muted">Avalie o impacto de um gasto inesperado na sua reserva e o tempo de recuperação.</p><label>Descrição<input id="imp-desc" placeholder="Ex: Conserto do carro, emergência..."/></label><label>Valor do imprevisto<input id="imp-valor" oninput="renderizarSimuladorImprevisto()" step="100" type="number" value="5000"/></label><label>Como pagar<select id="imp-origem" onchange="onImpOrigemChange()"><option value="reserva">Usar reserva / ativos líquidos</option><option value="cartao">Cartão de crédito (parcelado)</option><option value="aporte">Reduzir aporte mensal até recompor</option></select></label><label class="hidden" id="imp-parcelasWrap">Número de parcelas<input id="imp-parcelas" max="24" min="1" oninput="renderizarSimuladorImprevisto()" type="number" value="6"/></label></div><div class="card"><h3>Impacto</h3><div class="sim-results"><div><span>Reserva/liquidez atual</span><strong id="imp-reserva-atual">R$ 0,00</strong></div><div><span>Reserva após o imprevisto</span><strong id="imp-reserva-nova">R$ 0,00</strong></div><div><span>Cobertura atual</span><strong id="imp-cobertura-atual">0,0 meses</strong></div><div><span>Cobertura após</span><strong id="imp-cobertura-nova">0,0 meses</strong></div></div><div class="scenario-grid"><div><b>Tempo p/ recompor</b><strong id="imp-tempo-recompor">—</strong><small>No ritmo de aporte do mês</small></div><div><b>Parcela mensal</b><strong id="imp-parcela-mensal">—</strong><small>Se parcelado no cartão</small></div><div><b>Risco</b><strong id="imp-risco">—</strong><small>Reserva mínima recomendada: 6 meses</small></div></div></div></div></div>
+<div class="sim-subpanel" id="simPanel-whatif">
+<div class="simulator-layout">
+<div class="card simulator-form">
+<h3>Quero, Posso, Preciso + E Se...?</h3>
+<p class="muted">Avalie uma compra antes de transformá-la em compromisso. O mesmo cálculo mostra o impacto financeiro e comportamental da decisão.</p>
+<label class="wi-advanced-field">Produto ou serviço<input id="wi-desc" placeholder="Ex: TV nova, viagem, carro novo"></label>
+<label>Valor da compra<input id="wi-valor" type="number" min="0" step="0.01" value="3000" oninput="renderizarWhatIf()"></label>
+<label>Parcelas<input id="wi-parcelas" type="number" min="1" max="60" value="10" oninput="renderizarWhatIf()"></label><button type="button" class="btn-sm" onclick="toggleWhatIfAdvanced()">Ver diagnóstico completo</button>
+<label class="wi-advanced-field">Meta impactada (opcional)<select id="wi-meta" onchange="renderizarWhatIf()"><option value="">Nenhuma meta selecionada</option></select></label>
+<label class="wi-advanced-field">Taxa de referência anual (%)<input id="wi-taxa" type="number" min="0" step="0.1" value="8" oninput="renderizarWhatIf()"></label>
+<label class="wi-advanced-field">Horas de trabalho por mês<input id="wi-horas" type="number" min="1" step="1" value="160" oninput="renderizarWhatIf()"></label>
+<label class="wi-advanced-field">Quero — por quê?<select id="wi-quero" onchange="renderizarWhatIf()"><option value="sonho">É um sonho antigo</option><option value="recompensa">É uma recompensa</option><option value="passageiro">É uma vontade passageira</option></select></label>
+<label class="wi-advanced-field">Posso — capacidade financeira<select id="wi-posso" onchange="renderizarWhatIf()"><option value="sim">Consigo sem comprometer o essencial</option><option value="parcial">Consigo, mas apertaria meu orçamento</option><option value="nao">Comprometeria minha segurança financeira</option></select></label>
+<label class="wi-advanced-field">Preciso — necessidade<select id="wi-preciso" onchange="renderizarWhatIf()"><option value="necessidade">É uma necessidade</option><option value="qualidade">Melhora qualidade de vida</option><option value="capricho">É um capricho</option><option value="emergencia">É uma emergência</option></select></label>
+</div>
+<div class="card">
+<h3>Diagnóstico da decisão</h3>
+<div class="sim-results">
+<div><span>Parcela mensal</span><strong id="wi-parcela">R$ 0,00</strong></div>
+<div><span>Comprometimento da renda</span><strong id="wi-comp">0%</strong></div>
+<div><span>Margem mensal após a compra</span><strong id="wi-margem">R$ 0,00</strong></div>
+<div><span>Status</span><strong id="wi-status">—</strong></div>
+<div><span>Custo de oportunidade</span><strong id="wi-oportunidade">R$ 0,00</strong></div>
+<div><span>Horas de trabalho</span><strong id="wi-horas-trabalho">0 h</strong></div>
+<div><span>Menor saldo em 90 dias</span><strong id="wi-menor-saldo-90">R$ 0,00</strong></div>
+<div><span>Risco futuro</span><strong id="wi-risco-futuro">—</strong></div>
+</div>
+<div id="wi-diagnostico" class="analysis-box mt-20"></div>
+<div id="wi-recomendacao" class="decision-recommendation mt-10"></div>
+<div id="wi-emocao" class="qpp-emotion mt-10"></div>
+</div>
+</div>
+</div>
+</section>
+<button id="finFab" class="fin-fab" onclick="toggleFIN()" aria-label="Abrir FIN">
+  <span id="finFabCharacter" class="fin-character fin-character-mini state-calm" aria-hidden="true"><span class="fin-character-screen"><i class="fin-eye left"></i><i class="fin-eye right"></i><i class="fin-mouth"></i></span><b class="fin-character-coin">$</b></span>
+  <span class="fin-fab-label">FIN</span><i id="finBadge" class="fin-badge hidden">!</i>
+</button>
+<div id="finPanel" class="fin-panel" aria-hidden="true">
+  <div class="fin-panel-head"><div class="fin-brand-head"><span id="finPanelCharacter" class="fin-character state-calm" aria-hidden="true"><span class="fin-character-screen"><i class="fin-eye left"></i><i class="fin-eye right"></i><i class="fin-mouth"></i></span><b class="fin-character-coin">$</b></span><div><span class="eyebrow">FIN</span><h3>Seu copiloto financeiro</h3><p id="fin-context-label">Estou observando seu cenário atual.</p></div></div><button class="fin-close" onclick="toggleFIN(false)">×</button></div>
+  <div id="fin-content" class="fin-content"></div>
+  <div class="fin-question"><input id="finQuestion" placeholder="Pergunte ao FIN o que quiser sobre seu cenário..." onkeydown="if(event.key==='Enter')perguntarFIN()"><button class="btn-primary" onclick="perguntarFIN()">Perguntar</button></div>
+  <details class="fin-settings"><summary>⚙ Preferências do FIN</summary><div class="fin-settings-grid"><label>Reserva de referência (meses)<input id="finReservaMeses" type="number" min="1" max="24" step="0.5"></label><label>Desvio para alerta (%)<input id="finDesvioPct" type="number" min="5" max="200" step="5"></label><label>Comprometimento do cartão (%)<input id="finCartaoPct" type="number" min="5" max="100" step="5"></label><label class="fin-voz-label"><span>Voz do FIN (experimental)</span><input id="finVoz" type="checkbox"></label><button class="btn-primary" type="button" onclick="salvarPreferenciasFIN()">Salvar preferências</button></div></details>
+  <div id="fin-answer" class="fin-answer hidden"></div>
+  <div class="fin-footnote">FIN analisa os dados do motor financeiro, explica os motivos e apresenta alternativas. Ele orienta e ensina; a decisão continua sendo sua.</div>
+</div>
+</main>
+</div>
+<!-- MODAIS -->
+<nav class="mobile-bottom-nav" aria-label="Navegação principal do app">
+  <button type="button" class="mobile-nav-btn active" data-tab="dashboard" onclick="goToTab('dashboard')"><span>⌂</span><small>Início</small></button>
+  <button type="button" class="mobile-nav-btn" data-tab="extrato" onclick="goToTab('extrato')"><span>≡</span><small>Extrato</small></button>
+  <button type="button" class="mobile-nav-primary" onclick="openTransactionModal()"><b>＋</b><small>Lançar</small></button>
+  <button type="button" class="mobile-nav-btn" data-tab="patrimonio" onclick="goToTab('patrimonio')"><span>◈</span><small>Patrimônio</small></button>
+  <button type="button" class="mobile-nav-btn" onclick="toggleFIN(true)"><span>✦</span><small>FIN</small></button>
+</nav>
+<div class="mobile-nav-safe-area" aria-hidden="true"></div>
+<div class="modal" id="txModal"><div class="modal-content"><button class="close" onclick="closeTransactionModal()">×</button><h3>Nova transação</h3><form onsubmit="handleSaveTransaction(event)">
+<label>Descrição<input id="txDesc" oninput="sugerirCategoriaInteligente()" required=""/></label>
+<label id="txValorLabel"><span id="txValorLabelText">Valor</span><input id="txValor" min="0.01" oninput="renderResgateTaxPreview()" required="" step="0.01" type="number"/></label>
+<label>O que você quer registrar?<select id="txTipo" onchange="onTxTipoChange()"><option value="despesa">Despesa</option><option value="receita">Receita</option></select></label>
+<div class="hidden subfields" id="txResgateWrap"><label>Investimento<select id="txResgatePatrimonio"></select></label><label>Data da aplicação (para cálculo tributário)<input id="txResgateDataAplicacao" onchange="renderResgateTaxPreview()" type="date"/></label><div class="form-help">Para renda fixa tributável, o sistema estima IR pela tabela regressiva vigente e considera IOF apenas quando aplicável. O valor efetivamente retido pelo banco pode variar conforme o produto.</div><div class="analysis-box"><span>IR estimado</span><strong id="txResgateIR">R$ 0,00</strong><span>IOF estimado</span><strong id="txResgateIOF">R$ 0,00</strong><span>Valor líquido</span><strong id="txResgateLiquido">R$ 0,00</strong></div></div><div class="hidden subfields" id="txAmortizacaoWrap"><label>Financiamento<select id="txAmortizacaoFinanciamento"></select></label><label>Objetivo da amortização<select id="txAmortizacaoObjetivo"><option value="prazo">Reduzir prazo</option><option value="parcela">Reduzir valor da parcela</option></select></label><p class="form-help">A amortização reduz o principal da dívida. O efeito sobre prazo/parcela é uma simulação; confirme as condições no seu contrato e com a instituição financeira.</p></div>
+<div id="txCategoriaDespesaWrap">
+<label>Categoria (vinculada ao Orçamento Dinâmico)<select id="txCategoriaSelect" onchange="onTxCategoriaChange()"></select></label>
+<label class="hidden" id="txCategoriaNovaWrap">Nome da nova categoria<input id="txCategoriaNova" placeholder="Ex: Saúde"/></label>
+<div class="form-help">Ao escolher "+ Nova categoria", ela é criada automaticamente no Orçamento Dinâmico.</div>
+</div>
+<div class="hidden" id="txCategoriaOutrosWrap">
+<label>Categoria<input id="txCategoriaTexto"/></label>
+</div>
+<label id="txMesLabel">Mês de referência<input id="txMes" onchange="$('txData').value=monthToDate(this.value);renderResgateTaxPreview()" required="" type="month"/></label>
+<input id="txData" type="hidden"/>
+<div class="form-help">Escolha apenas o mês. O sistema usa internamente o primeiro dia do mês para manter os cálculos e previsões precisos.</div>
+<div class="recurrence-box"><label class="checkbox-row"><input id="txRecorrente" onchange="onTxRecorrenciaToggle()" type="checkbox"/> Repetir automaticamente todo mês</label><div class="hidden subfields" id="txRecorrenciaFields"><label>Quantidade de meses<input id="txRecorrenciaMeses" max="120" min="1" type="number" value="12"/></label><div class="form-help">Ex.: aluguel, salário, assinatura ou outra despesa/receita fixa. O sistema criará as ocorrências mensais automaticamente.</div></div></div>
+<label class="checkbox-row hidden" id="txFinanciamentoCheckWrap"><input id="txIsFinanciamento" onchange="onTxFinanciamentoToggle()" type="checkbox"/>Esta é uma parcela de financiamento</label>
+<div class="hidden subfields" id="txFinanciamentoWrap"><label>Financiamento<select id="txFinanciamentoSelect"></select></label></div>
+<div class="hidden subfields" id="txCartaoWrap">
+<label>Cartão<select id="txCartaoSelect"></select></label>
+<div class="form-help">Para cartão, informe somente o valor total da fatura do mês. Não é necessário lançar cada compra.</div>
+</div>
+<div class="hidden subfields" id="txPatrimonioFields">
+<label>Investimento<select id="txPatrimonioSelect" onchange="onTxPatrimonioSelectChange()"></select></label>
+<div class="form-help">O investimento entra automaticamente no patrimônio. Escolha um investimento existente ou crie um novo. Meta e Reserva são finalidades do mesmo dinheiro e não geram patrimônio adicional.</div>
+<label class="hidden" id="txPatrimonioNovoWrap">Categoria do novo ativo<input id="txPatrimonioNovaCategoria" placeholder="Ex: Renda fixa, Ações, FIIs..."/></label>
+</div>
+<div class="hidden subfields" id="txInvestPurposeWrap"><label>Qual é o propósito deste investimento?<select id="txInvestPurpose" onchange="onTxInvestPurposeChange()"><option value="none">Nenhum específico</option><option value="meta">🎯 Meta</option><option value="reserva">🛡️ Reserva de emergência</option></select></label></div>
+<label class="checkbox-row hidden legacy-field" id="txMetaCheckWrap"><input id="txVincularMeta" onchange="onTxMetaToggle()" type="checkbox"/></label>
+<div class="hidden subfields legacy-field" id="txMetaWrap"><label>Meta<select id="txMetaSelect"></select></label></div>
+<label class="checkbox-row hidden legacy-field" id="txReservaCheckWrap"><input id="txDestinarReserva" type="checkbox"/></label>
+<div class="form-help hidden legacy-field" id="txReservaHelp">A Reserva de Emergência é uma finalidade do próprio ativo. O valor não é somado novamente ao patrimônio.</div>
+<button class="btn-primary mt-10" type="submit">Salvar</button></form></div></div>
+<div class="modal" id="patModal"><div class="modal-content"><button class="close" onclick="closePatrimonioModal()">×</button><h3 id="patModalTitle">Adicionar patrimônio</h3><form onsubmit="handleSavePatrimonio(event)">
+<label>Nome<input id="patNome" required=""/></label><label id="patClasseWrap">Classe<select id="patClasse" onchange="onPatClasseChange()"><option>Ativo</option><option>Passivo</option></select></label>
+<div id="patGenericosFields"><label id="patCategoriaWrap">Categoria<input id="patCat" onchange="onPatCategoriaChange()" oninput="onPatCategoriaChange()" placeholder="Renda fixa, Imóveis..." required=""/></label><label class="hidden" id="patInvestCategoriaWrap">Tipo de investimento<select id="patInvestCategoria" onchange="$('patCat').value=this.value;onPatCategoriaChange()"><option value="Investimentos">Investimentos</option><option value="CDB">CDB</option><option value="LCI">LCI</option><option value="LCA">LCA</option><option value="Tesouro">Tesouro</option><option value="Ações">Ações</option><option value="FIIs">FIIs</option><option value="Outros">Outros</option></select></label><div class="hidden subfields" id="patImovelFields"><h4>Dados do imóvel</h4><label>Valor de aquisição (quanto você pagou)<input id="patValorAquisicao" step="0.01" type="number"/></label><label>Valor atual do imóvel<input id="patValorAtual" step="0.01" type="number"/></label><label class="checkbox-row"><input type="checkbox" id="patGeraRenda" onchange="onPatImovelRendaChange()"> Este imóvel gera renda</label><label id="patRendaMensalWrap" class="hidden">Renda mensal de aluguel<input id="patRendaMensal" step="0.01" type="number"/></label><div class="form-help">Imóvel é patrimônio, não ativo líquido. O valor atual compõe o patrimônio; o valor de aquisição permite acompanhar a valorização desde a compra.</div></div><div id="patInvestimentoFields" class="subfields"><h4>Dados do investimento</h4><label>Indexador<select id="patIndexador"><option value="prefixado">Prefixado</option><option value="CDI">CDI</option><option value="CDI+">CDI +</option><option value="IPCA+">IPCA +</option><option value="Selic">Selic</option><option value="outro">Outro</option></select></label><label>Data da aplicação<input id="patDataAplicacao" type="date"/></label><label>Vencimento<input id="patVencimento" type="date"/></label><label>Regime tributário<select id="patRegimeTributario"><option value="renda_fixa_regressiva">Renda fixa — regressivo</option><option value="isento">Isento</option><option value="outro">Outro</option></select></label></div><label id="patRentabilidadeWrap">Rentabilidade anual estimada (%)<input id="patRentabilidade" step="0.1" type="number" value="0"/></label><label id="patValorWrap">Valor / saldo inicial<input id="patValor" step="0.01" type="number"/></label><label class="checkbox-row" id="patReservaWrap"><input type="checkbox" id="patReservaEmergencia"> Destinar este ativo à reserva de emergência</label><div class="form-help" id="patReservaHelp">Reserva é uma finalidade do próprio ativo. O valor não é somado novamente ao patrimônio.</div><label id="patLiquidezWrap">Liquidez<select id="patLiquidez"><option>100%</option><option>Alta</option><option>Baixa</option><option>Sem liquidez</option><option>N/A</option></select></label></div><label class="hidden" id="patTipoPassivoWrap">Tipo de passivo<select id="patTipoPassivo" onchange="onPatTipoPassivoChange()"><option value="outro">Outro passivo</option><option value="financiamento">Financiamento Imobiliário</option></select></label>
+<div class="hidden subfields" id="patFinanciamentoFields"><h4>Dados do financiamento</h4><label>Valor do imóvel<input id="patValorBem" oninput="sincronizarValorFinanciado()" step="0.01" type="number"/></label><label>Entrada<input id="patEntrada" oninput="sincronizarValorFinanciado()" step="0.01" type="number" value="0"/></label><label>Valor financiado <small>(calculado automaticamente)</small><input id="patValorFinanciado" readonly step="0.01" type="number"/></label><label>Taxa de juros anual (%)<input id="patTaxaJuros" step="0.01" type="number" value="0"/></label><label>Sistema de amortização<select id="patSistemaAmortizacao"><option value="price">Price</option><option value="sac">SAC</option></select></label><div class="form-help">Não sabe qual escolher? Use a opção recomendada. <strong>Price</strong> tende a manter parcelas mais estáveis; no <strong>SAC</strong>, as parcelas tendem a começar maiores e diminuir ao longo do tempo.</div><label>Quantidade total de parcelas<input id="patParcelasTotal" min="1" type="number" value="1"/></label><label>Valor da parcela mensal<input id="patParcelaMensal" step="0.01" type="number"/></label><label>Parcelas já pagas (iniciais)<input id="patParcelasPagas" min="0" type="number" value="0"/></label><p class="form-help">Para financiamento imobiliário, o sistema calcula o valor financiado como <strong>valor do imóvel − entrada</strong>. O valor/saldo inicial genérico não é utilizado. Os pagamentos reduzem o principal; os juros futuros são recalculados sobre o saldo restante.</p></div>
+<button class="btn-primary mt-10" type="submit">Salvar</button></form></div></div>
+<div class="modal" id="cartaoModal"><div class="modal-content"><button class="close" onclick="closeCartaoModal()">×</button><h3 id="cartaoModalTitle">Novo cartão</h3><form onsubmit="handleSaveCartao(event)">
+<label>Nome<input id="cadNome" required=""/></label><label>Limite<input id="cadLimite" required="" step="0.01" type="number"/></label><label>Fechamento<input id="cadFechamento" max="31" min="1" required="" type="number"/></label><label>Vencimento<input id="cadVencimento" max="31" min="1" required="" type="number"/></label>
+<div class="card nested-card"><h4>Compromissos futuros</h4><p class="muted">Cadastre gastos que ainda não foram lançados para projetar o comprometimento do cartão.</p><div id="futureCommitmentsList"></div><button class="btn-sm" onclick="addFutureCommitmentField()" type="button">+ Adicionar compromisso</button></div>
+<button class="btn-primary mt-10" type="submit">Salvar</button></form></div></div>
+<div class="modal" id="metaModal"><div class="modal-content"><button class="close" onclick="closeMetaModal()">×</button><h3 id="metaModalTitle">Nova meta</h3><form onsubmit="handleSaveMeta(event)">
+<label>Nome<input id="metaNome" required=""/></label><label>Objetivo<input id="metaObjetivo" required="" step="0.01" type="number"/></label><label>Acumulado<input id="metaAcumulado" required="" step="0.01" type="number" value="0"/></label><label>Início<input id="metaInicio" required="" type="date"/></label><label>Prazo<input id="metaPrazo" required="" type="date"/></label><label>Frase pessoal<input id="metaFrase" placeholder="Ex: Isso é para ver o sorriso das crianças na praia"/></label>
+<button class="btn-primary mt-10" type="submit">Salvar</button></form></div></div>
+<div class="modal" id="scoreModal"><div class="modal-content score-modal"><button class="close" onclick="fecharScoreModal()">×</button><h3>Score de saúde financeira</h3><p class="muted">Cada pilar mostra onde sua nota está forte e onde existe espaço para melhorar.</p><div class="score-modal-status" id="score-modal-status"></div><div class="score-pillars" id="score-pillars"></div></div></div>
+<div class="modal" id="financiamentoDetalhesModal"><div class="modal-content financing-modal"><button class="close" onclick="fecharFinanciamentoDetalhes()">×</button><h3 id="fin-detalhes-titulo">Detalhes do financiamento</h3><div id="fin-detalhes-conteudo"></div></div></div>
+<div class="modal" id="metaPrazoModal"><div class="modal-content"><button class="close" onclick="fecharNovoPrazoMeta()">×</button><h3>Simular novo prazo</h3><p class="muted" id="meta-prazo-contexto"></p><div class="scenario-grid meta-prazo-grid" id="meta-prazo-cenarios"></div></div></div>
+<div class="modal" id="confirmModal"><div class="modal-content" style="width:380px">
+<h3 id="confirmModalTitle">Confirmar ação</h3>
+<p class="muted mt-10" id="confirmModalText"></p>
+<div class="mt-20" style="display:flex;gap:10px;justify-content:flex-end">
+<button class="btn-sm" onclick="closeConfirmModal()">Cancelar</button>
+<button class="btn-danger" onclick="executeConfirmedAction()">Confirmar</button>
+</div>
+</div></div>
+<script src="financial-engine.js"></script>
+<script src="js/core/data-backup.js"></script>
+<script src="js/fin/fin-rules.js"></script>
+<script src="js/fin/fin-decision.js"></script>
+<script src="js/fin/fin-journey.js"></script>
+<script src="js/fin/fin-outcome.js"></script>
+<script src="js/fin/fin-ui.js"></script>
+<script src="script.js"></script>
+<div class="modal" id="economiaMetaModal"><div class="modal-content"><button class="close" onclick="closeEconomiaMetaModal()">×</button><h3>Meta de economia</h3><form onsubmit="handleSaveEconomiaMeta(event)"><label>Percentual da renda<input id="economiaMetaValor" max="100" min="0" required="" step="0.1" type="number"/></label><p class="form-help">Use este valor como sua meta pessoal de economia mensal.</p><button class="btn-primary mt-10" type="submit">Salvar meta</button></form></div></div>
+<script src="app-shell.js"></script>
+
+<!-- FinançasPRO 5.1 — Onboarding progressivo -->
+<div id="fp-onboarding" class="fp-onboarding" hidden>
+  <div class="fp-onboarding-backdrop"></div>
+  <section class="fp-onboarding-card" role="dialog" aria-modal="true" aria-labelledby="fp-onboarding-title">
+    <div class="fp-onboarding-brand">FINANÇAS<span>PRO</span></div>
+    <div class="fp-onboarding-progress"><span id="fp-progress-bar"></span></div>
+
+    <div class="fp-step active" data-step="1">
+      <div class="fp-icon">✦</div>
+      <p class="fp-eyebrow">Vamos começar</p>
+      <h2 id="fp-onboarding-title">Organizar suas finanças começa com o primeiro passo.</h2>
+      <p class="fp-muted">O FIN vai conhecer seu cenário aos poucos. Você não precisa preencher tudo agora.</p>
+      <button type="button" class="fp-primary" data-next>Começar meu diagnóstico</button>
+      <button type="button" class="fp-link" data-skip>Explorar o app primeiro</button>
+    </div>
+
+    <div class="fp-step" data-step="2">
+      <p class="fp-eyebrow">1 de 4</p>
+      <h2>Quanto entra por mês?</h2>
+      <label class="fp-label" for="fp-income">Renda mensal</label>
+      <input id="fp-income" class="fp-input" inputmode="decimal" placeholder="R$ 0,00">
+      <p class="fp-muted">Pode ser uma estimativa. Você poderá ajustar depois.</p>
+      <div class="fp-actions"><button type="button" class="fp-secondary" data-back>Voltar</button><button type="button" class="fp-primary" data-next>Continuar</button></div>
+    </div>
+
+    <div class="fp-step" data-step="3">
+      <p class="fp-eyebrow">2 de 4</p>
+      <h2>Quanto costuma sair?</h2>
+      <label class="fp-label" for="fp-expenses">Gastos mensais</label>
+      <input id="fp-expenses" class="fp-input" inputmode="decimal" placeholder="R$ 0,00">
+      <p class="fp-muted">Inclua seus gastos médios. O FIN usará isso para estimar sua margem.</p>
+      <div class="fp-actions"><button type="button" class="fp-secondary" data-back>Voltar</button><button type="button" class="fp-primary" data-next>Continuar</button></div>
+    </div>
+
+    <div class="fp-step" data-step="4">
+      <p class="fp-eyebrow">3 de 4</p>
+      <h2>Você já tem uma reserva?</h2>
+      <label class="fp-label" for="fp-reserve">Reserva financeira</label>
+      <input id="fp-reserve" class="fp-input" inputmode="decimal" placeholder="R$ 0,00">
+      <p class="fp-muted">Se não tiver, deixe em branco. Isso não impede o diagnóstico.</p>
+      <div class="fp-actions"><button type="button" class="fp-secondary" data-back>Voltar</button><button type="button" class="fp-primary" data-next>Continuar</button></div>
+    </div>
+
+    <div class="fp-step" data-step="5">
+      <p class="fp-eyebrow">4 de 4</p>
+      <h2>O FIN está pronto para analisar.</h2>
+      <div class="fp-summary">
+        <div><span>Renda</span><strong id="fp-s-income">R$ 0,00</strong></div>
+        <div><span>Gastos</span><strong id="fp-s-expenses">R$ 0,00</strong></div>
+        <div><span>Sobra estimada</span><strong id="fp-s-surplus">R$ 0,00</strong></div>
+        <div><span>Reserva</span><strong id="fp-s-reserve">R$ 0,00</strong></div>
+      </div>
+      <div class="fp-actions"><button type="button" class="fp-secondary" data-back>Voltar</button><button type="button" class="fp-primary" data-finish>Ver meu diagnóstico</button></div>
+    </div>
+
+    <div class="fp-step" data-step="6">
+      <div class="fp-icon">✓</div>
+      <p class="fp-eyebrow">Primeiro diagnóstico</p>
+      <h2 id="fp-diagnosis-title">Seu cenário está pronto para começar.</h2>
+      <p id="fp-diagnosis-text" class="fp-muted"></p>
+      <div class="fp-diagnosis-actions">
+        <button type="button" class="fp-primary" data-close>Entrar no Dashboard</button>
+        <button type="button" class="fp-link" data-reset>Refazer diagnóstico</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+
+<script id="fp-onboarding-script">
+(function(){
+  const KEY="finpro_5_1_onboarding";
+  const modal=document.getElementById("fp-onboarding");
+  if(!modal) return;
+  const steps=[...modal.querySelectorAll(".fp-step")];
+  const progress=document.getElementById("fp-progress-bar");
+  let current=1;
+  const money=(v)=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(Number(v)||0);
+  const parse=(v)=>Number(String(v||"").replace(/[^\d,-]/g,"").replace(/\./g,"").replace(",", "."))||0;
+
+  function show(step){
+    current=step;
+    steps.forEach(s=>s.classList.toggle("active",Number(s.dataset.step)===step));
+    if(progress) progress.style.width=(Math.min(step,6)/6*100)+"%";
+    modal.hidden=false;
+  }
+  function save(){
+    const income=parse(document.getElementById("fp-income").value);
+    const expenses=parse(document.getElementById("fp-expenses").value);
+    const reserve=parse(document.getElementById("fp-reserve").value);
+    const surplus=income-expenses;
+    localStorage.setItem(KEY,JSON.stringify({income,expenses,reserve,createdAt:new Date().toISOString()}));
+    document.getElementById("fp-s-income").textContent=money(income);
+    document.getElementById("fp-s-expenses").textContent=money(expenses);
+    document.getElementById("fp-s-surplus").textContent=money(surplus);
+    document.getElementById("fp-s-reserve").textContent=money(reserve);
+    const title=document.getElementById("fp-diagnosis-title");
+    const text=document.getElementById("fp-diagnosis-text");
+    if(surplus>0){
+      title.textContent="Você já tem uma sobra para construir.";
+      text.textContent="Sua renda estimada supera seus gastos em "+money(surplus)+" por mês. O próximo passo é organizar essa sobra entre reserva, objetivos e investimentos.";
+    } else if(surplus<0){
+      title.textContent="O primeiro objetivo é recuperar o equilíbrio.";
+      text.textContent="Seus gastos estimados superam sua renda em "+money(Math.abs(surplus))+" por mês. O FIN pode ajudar a identificar onde está a pressão e montar um plano.";
+    } else {
+      title.textContent="Seu ponto de partida está claro.";
+      text.textContent="Sua renda e seus gastos estão praticamente equilibrados. Agora podemos mapear sua reserva, patrimônio e objetivos.";
+    }
+  }
+
+  modal.addEventListener("click",(e)=>{
+    const next=e.target.closest("[data-next]");
+    const back=e.target.closest("[data-back]");
+    const finish=e.target.closest("[data-finish]");
+    const close=e.target.closest("[data-close]");
+    const skip=e.target.closest("[data-skip]");
+    const reset=e.target.closest("[data-reset]");
+    if(skip){ modal.hidden=true; return; }
+    if(next){ if(current===2 && !document.getElementById("fp-income").value) document.getElementById("fp-income").focus(); show(Math.min(6,current+1)); return; }
+    if(back){ show(Math.max(1,current-1)); return; }
+    if(finish){ save(); show(6); return; }
+    if(reset){ show(2); return; }
+    if(close){ modal.hidden=true; return; }
+  });
+
+  window.finproOpenOnboarding=function(){show(1);};
+  if(!localStorage.getItem(KEY)) show(1);
+})();
+</script>
+
+</body></html>

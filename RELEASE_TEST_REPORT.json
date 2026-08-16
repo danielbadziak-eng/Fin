@@ -1,0 +1,7 @@
+{
+  "release": "4.7.2",
+  "status": "PASS",
+  "suite": {"tests": 22, "failed": 0},
+  "dashboard": {"mode": "simplified", "kpis": ["entradas","saidas","sobra","investimentos","patrimonio_liquido","reserva"], "header_actions": ["analisar_cenario","nova_transacao","apagar_dados"]},
+  "notes": "Dashboard simplificado sem duplicidade de saúde/fatura/metas/ações rápidas no corpo. FIN permanece como centro de decisão."
+}
