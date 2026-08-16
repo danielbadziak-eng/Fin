@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta name="data-finpro-version" content="5.2.1">
 <meta name="theme-color" content="#0f1418"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -29,16 +30,20 @@
 <body>
 <div class="app-container">
 <aside class="sidebar">
-<div class="brand"><h2>Finanças<span>PRO</span></h2><small>Gestão Financeira Inteligente</small></div>
-<nav class="nav-menu">
-<button class="nav-btn active" onclick="switchTab('dashboard',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><rect height="9" rx="1.5" width="7" x="3" y="3"></rect><rect height="5" rx="1.5" width="7" x="14" y="3"></rect><rect height="9" rx="1.5" width="7" x="14" y="12"></rect><rect height="5" rx="1.5" width="7" x="3" y="16"></rect></svg> Dashboard</button>
-<button class="nav-btn" onclick="switchTab('orcamento',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><rect height="18" rx="2" width="16" x="4" y="3"></rect><path d="M8 3v3h8V3"></path><path d="M8 11h8M8 15h8M8 19h5"></path></svg> Orçamento</button>
-<button class="nav-btn" onclick="switchTab('patrimonio',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M21 7H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"></path><path d="M17 7V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v2"></path><circle cx="16.5" cy="13.5" r="1.5"></circle></svg> Patrimônio</button>
-<button class="nav-btn" onclick="switchTab('cartoes',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><rect height="14" rx="2" width="20" x="2" y="5"></rect><path d="M2 10h20"></path><path d="M6 15h4"></path></svg> Cartões</button>
-<button class="nav-btn" onclick="switchTab('metas',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1"></circle></svg> Metas</button>
-<button class="nav-btn" onclick="switchTab('extrato',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"></path></svg> Extrato</button>
-<button class="nav-btn" onclick="switchTab('simulador',this)"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M3 17 9 11l4 4 8-8"></path><path d="M21 7h-6v6"></path></svg> Simulador</button>
+<div class="brand"><div class="brand-row"><div><h2>Finanças<span>PRO</span></h2><small>Gestão Financeira Inteligente</small></div><button class="mobile-more-shortcut" type="button" onclick="toggleMoreMenu()">☰ Mais</button></div></div>
+<nav class="nav-menu" aria-label="Navegação principal">
+<button class="nav-btn active" onclick="switchTab('dashboard',this)"><span aria-hidden="true">⌂</span> Visão geral</button>
+<button class="nav-btn" onclick="switchTab('extrato',this)"><span aria-hidden="true">⇄</span> Movimentações</button>
+<button class="nav-btn" onclick="switchTab('patrimonio',this)"><span aria-hidden="true">◈</span> Patrimônio</button>
+<button class="nav-btn nav-fin-btn" onclick="toggleFIN(true)"><span aria-hidden="true">✦</span> FIN</button>
+<button class="nav-btn nav-more-toggle" type="button" onclick="toggleMoreMenu()"><span aria-hidden="true">☰</span> Mais</button>
 </nav>
+<div class="sidebar-more-menu" id="sidebar-more-menu" aria-hidden="true">
+  <button class="nav-btn" onclick="switchTab('orcamento',this)">Orçamento</button>
+  <button class="nav-btn" onclick="switchTab('cartoes',this)">Cartões</button>
+  <button class="nav-btn" onclick="switchTab('metas',this)">Metas</button>
+  <button class="nav-btn" onclick="switchTab('simulador',this)">Simulador</button>
+</div>
 <div class="theme-switch">
 <label>Tema
       <select id="themeSelect" onchange="applyTheme(this.value)">
@@ -292,6 +297,7 @@
 <div class="hidden subfields" id="txCartaoWrap">
 <label>Cartão<select id="txCartaoSelect"></select></label>
 <div class="form-help">Para cartão, informe somente o valor total da fatura do mês. Não é necessário lançar cada compra.</div>
+<div class="card-registration-required hidden" id="txCartaoEmptyState"><strong>Cadastre seus cartões primeiro.</strong><span>Para lançar uma fatura, o FinançasPRO precisa saber qual cartão será utilizado.</span><button class="btn-sm" type="button" onclick="registerCardThenTransaction()">+ Cadastrar cartão</button></div>
 </div>
 <div class="hidden subfields" id="txPatrimonioFields">
 <label>Investimento<select id="txPatrimonioSelect" onchange="onTxPatrimonioSelectChange()"></select></label>
@@ -303,7 +309,7 @@
 <div class="hidden subfields legacy-field" id="txMetaWrap"><label>Meta<select id="txMetaSelect"></select></label></div>
 <label class="checkbox-row hidden legacy-field" id="txReservaCheckWrap"><input id="txDestinarReserva" type="checkbox"/></label>
 <div class="form-help hidden legacy-field" id="txReservaHelp">A Reserva de Emergência é uma finalidade do próprio ativo. O valor não é somado novamente ao patrimônio.</div>
-<button class="btn-primary mt-10" type="submit">Salvar</button></form></div></div>
+<button id="txSaveBtn" class="btn-primary mt-10" type="submit">Salvar</button></form></div></div>
 <div class="modal" id="patModal"><div class="modal-content"><button class="close" onclick="closePatrimonioModal()">×</button><h3 id="patModalTitle">Adicionar patrimônio</h3><form onsubmit="handleSavePatrimonio(event)">
 <label>Nome<input id="patNome" required=""/></label><label id="patClasseWrap">Classe<select id="patClasse" onchange="onPatClasseChange()"><option>Ativo</option><option>Passivo</option></select></label>
 <div id="patGenericosFields"><label id="patCategoriaWrap">Categoria<input id="patCat" onchange="onPatCategoriaChange()" oninput="onPatCategoriaChange()" placeholder="Renda fixa, Imóveis..." required=""/></label><label class="hidden" id="patInvestCategoriaWrap">Tipo de investimento<select id="patInvestCategoria" onchange="$('patCat').value=this.value;onPatCategoriaChange()"><option value="Investimentos">Investimentos</option><option value="CDB">CDB</option><option value="LCI">LCI</option><option value="LCA">LCA</option><option value="Tesouro">Tesouro</option><option value="Ações">Ações</option><option value="FIIs">FIIs</option><option value="Outros">Outros</option></select></label><div class="hidden subfields" id="patImovelFields"><h4>Dados do imóvel</h4><label>Valor de aquisição (quanto você pagou)<input id="patValorAquisicao" step="0.01" type="number"/></label><label>Valor atual do imóvel<input id="patValorAtual" step="0.01" type="number"/></label><label class="checkbox-row"><input type="checkbox" id="patGeraRenda" onchange="onPatImovelRendaChange()"> Este imóvel gera renda</label><label id="patRendaMensalWrap" class="hidden">Renda mensal de aluguel<input id="patRendaMensal" step="0.01" type="number"/></label><div class="form-help">Imóvel é patrimônio, não ativo líquido. O valor atual compõe o patrimônio; o valor de aquisição permite acompanhar a valorização desde a compra.</div></div><div id="patInvestimentoFields" class="subfields"><h4>Dados do investimento</h4><label>Indexador<select id="patIndexador"><option value="prefixado">Prefixado</option><option value="CDI">CDI</option><option value="CDI+">CDI +</option><option value="IPCA+">IPCA +</option><option value="Selic">Selic</option><option value="outro">Outro</option></select></label><label>Data da aplicação<input id="patDataAplicacao" type="date"/></label><label>Vencimento<input id="patVencimento" type="date"/></label><label>Regime tributário<select id="patRegimeTributario"><option value="renda_fixa_regressiva">Renda fixa — regressivo</option><option value="isento">Isento</option><option value="outro">Outro</option></select></label></div><label id="patRentabilidadeWrap">Rentabilidade anual estimada (%)<input id="patRentabilidade" step="0.1" type="number" value="0"/></label><label id="patValorWrap">Valor / saldo inicial<input id="patValor" step="0.01" type="number"/></label><label class="checkbox-row" id="patReservaWrap"><input type="checkbox" id="patReservaEmergencia"> Destinar este ativo à reserva de emergência</label><div class="form-help" id="patReservaHelp">Reserva é uma finalidade do próprio ativo. O valor não é somado novamente ao patrimônio.</div><label id="patLiquidezWrap">Liquidez<select id="patLiquidez"><option>100%</option><option>Alta</option><option>Baixa</option><option>Sem liquidez</option><option>N/A</option></select></label></div><label class="hidden" id="patTipoPassivoWrap">Tipo de passivo<select id="patTipoPassivo" onchange="onPatTipoPassivoChange()"><option value="outro">Outro passivo</option><option value="financiamento">Financiamento Imobiliário</option></select></label>
@@ -466,6 +472,15 @@
   window.finproOpenOnboarding=function(){show(1);};
   if(!localStorage.getItem(KEY)) show(1);
 })();
+</script>
+
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./service-worker.js', {scope:'./'}).catch(function(){});
+  });
+}
 </script>
 
 </body></html>

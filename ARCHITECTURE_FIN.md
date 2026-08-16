@@ -1,4 +1,6 @@
-# FinançasPRO — Architecture 4.7.1
+> Current release: FinançasPRO 5.2.1
+
+# FinançasPRO — Architecture 5.2.1
 
 `Financial Engine → FIN Rules → FIN Decision → FIN Journey → FIN Outcome → UI`
 
@@ -12,7 +14,7 @@
 `script.js` contém adaptadores e telas não extraídas; as funções críticas do FIN delegam para os módulos acima.
 
 ## Schema
-4.7.1 / 22, com migração aditiva e idempotente.
+5.2.1 / 22, com migração aditiva e idempotente.
 
 ## Integrity
 Arredondamento monetário, validação, invariantes, edge cases e operações potencialmente repetidas são tratados no Financial Engine.
