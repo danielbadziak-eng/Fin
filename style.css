@@ -540,3 +540,28 @@ body{background:var(--bg);color:var(--text);min-height:100vh;transition:backgrou
 /* FinançasPRO 5.2 — navegação simplificada e cadastro obrigatório de cartões */
 .brand-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.mobile-more-shortcut{display:none;border:1px solid var(--border);background:rgba(var(--primary-rgb),.08);color:var(--text);border-radius:10px;padding:8px 10px;font-size:11px;font-weight:700}.sidebar-more-menu{display:none;padding:0 12px 10px;border-bottom:1px solid var(--border)}.sidebar-more-menu.open{display:block}.sidebar-more-menu .nav-btn{font-size:13px;padding:9px 12px}.nav-more-toggle{margin-top:4px}.nav-fin-btn{color:var(--primary)}.card-registration-required{display:flex;flex-direction:column;gap:7px;margin-top:10px;padding:11px 12px;border:1px solid rgba(var(--primary-rgb),.25);border-radius:12px;background:rgba(var(--primary-rgb),.06)}.card-registration-required strong{font-size:12px}.card-registration-required span{font-size:11px;color:var(--muted);line-height:1.4}.card-registration-required button{align-self:flex-start}.btn-primary:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.5)}
 @media(max-width:850px){.sidebar .nav-menu{display:none}.sidebar-more-menu{display:none}.sidebar-more-menu.open{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:8px 10px}.mobile-more-shortcut{display:block}.brand-row{width:100%}.sidebar{border-bottom:1px solid var(--border)}}
+
+/* FIN UX FIX 5.2.1-FIX1: keep FIN only in the bottom/main navigation.
+   The floating right-side FIN button is intentionally disabled. */
+.fin-fab{display:none!important}
+
+/* Mobile "Mais" menu: the trigger lives in the compact header, so the
+   menu must float below that header rather than remain hidden with the sidebar. */
+@media(max-width:850px){
+  .sidebar{position:relative}
+  .sidebar-more-menu.open{
+    position:absolute;
+    top:64px;
+    left:12px;
+    right:12px;
+    z-index:2100;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    padding:10px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:var(--panel);
+    box-shadow:0 18px 40px rgba(0,0,0,.35);
+  }
+}
